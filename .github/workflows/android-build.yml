@@ -9,9 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
-      NDK_VERSION: "21.4.7075529" # در صورت نیاز نسخهٔ دیگری بگذار
-      ANDROID_PLATFORM: "android-33" # تغییر بده در صورت نیاز
+      ANDROID_SDK_ROOT: /tmp/android-sdk
+      NDK_VERSION: "21.4.7075529"
+      ANDROID_PLATFORM: "android-33"
     steps:
       - name: Checkout repository (with submodules)
         uses: actions/checkout@v4
