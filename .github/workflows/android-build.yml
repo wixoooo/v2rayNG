@@ -9,16 +9,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
+
       - name: Grant execute to gradlew
+        # run the chmod inside the V2rayNG folder where gradlew lives
         run: chmod +x ./gradlew
+        working-directory: V2rayNG
+
       - name: Build debug APK
+        # run the wrapper from inside V2rayNG
         run: ./gradlew :app:assembleDebug --no-daemon
+        working-directory: V2rayNG
+
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
