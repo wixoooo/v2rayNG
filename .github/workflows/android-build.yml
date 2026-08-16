@@ -8,18 +8,132 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
+      NDK_VERSION: "21.4.7075529" # در صورت نیاز نسخهٔ دیگری بگذار
+      ANDROID_PLATFORM: "android-33" # تغییر بده در صورت نیاز
     steps:
       - name: Checkout repository (with submodules)
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
           fetch-depth: 0
+          persist-credentials: true
 
-      - name: Set up JDK
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Install Android SDK command-line tools and NDK
+        run: |
+          set -euo pipefail
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          mkdir -p "$ANDROID_SDK_ROOT"
+          cd "$ANDROID_SDK_ROOT"
+          # download latest commandline tools (link may change over time)
+          curl -fsSLo cmdline-tools.zip "https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip"
+          unzip -q cmdline-tools.zip -d "$ANDROID_SDK_ROOT/cmdline-tools"
+          # Move to "latest" so sdkmanager path is predictable
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+          mv "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools/"* "$ANDROID_SDK_ROOT/cmdline-tools/latest/" || true
+          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+          echo "y" | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "platforms;${ANDROID_PLATFORM}" "ndk;${NDK_VERSION}"
+        shell: bash
+
+      - name: Ensure environment variables for Android tools
+        run: |
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          echo "Add sdk tools to PATH"
+          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
+
+      - name: Build native core (if present)
+        # Try common locations for the native core and run its build script if available.
+        run: |
+          set -euo pipefail
+          # Search common submodule folder names
+          CANDIDATES=(
+            "AndroidLibXrayLite"
+            "libv2ray"
+            "libs/libv2ray"
+            "lib/libv2ray"
+            "core"
+            "vendor/AndroidLibXrayLite"
+          )
+
+          FOUND_DIR=""
+          for d in "${CANDIDATES[@]}"; do
+            if [ -d "$d" ]; then
+              FOUND_DIR="$d"
+              break
+            fi
+          done
+
+          # If not found at top-level, try to find any directory with "AndroidLibXrayLite" name anywhere under repo
+          if [ -z "$FOUND_DIR" ]; then
+            FOUND_DIR=$(find . -maxdepth 4 -type d -name "AndroidLibXrayLite" -print -quit || true)
+          fi
+
+          if [ -z "$FOUND_DIR" ]; then
+            echo "No native core directory (AndroidLibXrayLite / libv2ray) detected. Skipping native build step."
+            exit 0
+          fi
+
+          echo "Found native core directory: $FOUND_DIR"
+          cd "$FOUND_DIR"
+
+          # Prefer prebuilt AAR if present
+          if ls *.aar 1> /dev/null 2>&1; then
+            echo "Found prebuilt AAR(s) in $FOUND_DIR, skipping native build."
+            exit 0
+          fi
+
+          # Try common build scripts
+          if [ -f ./build_android.sh ]; then
+            chmod +x ./build_android.sh
+            ./build_android.sh
+            exit 0
+          fi
+
+          if [ -f ./build.sh ]; then
+            chmod +x ./build.sh
+            ./build.sh
+            exit 0
+          fi
+
+          # Try Gradle wrapper inside the native module if exists
+          if [ -f gradlew ]; then
+            chmod +x gradlew
+            ./gradlew assemble || true
+          fi
+
+          # Try using Go build if go.mod exists (best-effort)
+          if [ -f go.mod ]; then
+            echo "Attempting to build Go native library (best-effort)"
+            # Ensure GOOS/GOARCH for cross-compilation if required - this is project-specific
+            # Many projects provide their own build scripts; if not, we may not be able to build automatically.
+            if command -v go >/dev/null 2>&1; then
+              go env
+              # If the repo has a script or Makefile target, try them
+              if command -v make >/dev/null 2>&1 && [ -f Makefile ]; then
+                make android || true
+              else
+                echo "No Makefile or build script to build Go native core automatically. Please add prebuilt AAR or a build script in the native module."
+              fi
+            else
+              echo "go tool not available"
+            fi
+          fi
+
+          echo "Native build step finished (if anything could be built)."
+        shell: bash
 
       - name: Grant execute to gradlew
         run: chmod +x ./gradlew
