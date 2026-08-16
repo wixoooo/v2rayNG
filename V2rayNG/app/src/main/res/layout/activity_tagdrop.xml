@@ -47,7 +47,7 @@
     </RelativeLayout>
 
     <!-- Center circle card -->
-    <com.google.android.material.card.MaterialCardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/card_center"
         android:layout_width="220dp"
         android:layout_height="220dp"
@@ -85,7 +85,7 @@
 
         </FrameLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+    </androidx.cardview.widget.CardView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add"
