@@ -18,4 +18,21 @@
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsTranslucent">true</item>
     </style>
+    <!-- TagDrop-specific MaterialComponents theme (Bridge to preserve AppCompat) -->
+    <style name="Theme.V2rayNG.TagDrop" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
+        <!-- Use the surface color (keeps material components consistent) -->
+        <item name="colorSurface">@android:color/white</item>
+        <item name="colorOnSurface">@android:color/black</item>
+        
+        <!-- Make sure Material components use the Material shapes -->
+        <item name="materialCardViewStyle">@style/Widget.MaterialComponents.CardView</item>
+        
+        <!-- Window/status bar handling for the "liquid glass" look -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        
+        <!-- Ensure no action bar for this activity -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 </resources>
