@@ -1,21 +1,36 @@
-  - name: Set up JDK
-    uses: actions/setup-java@v4
-    with:
-      distribution: 'temurin'
-      java-version: '17'
+name: Android Debug Build (TagDrop)
 
-  - name: Grant execute to gradlew
-    # run the chmod inside the V2rayNG folder where gradlew lives
-    run: chmod +x ./gradlew
-    working-directory: V2rayNG
+on:
+  push:
+    branches: [ feature/tagdrop-ui ]
+  workflow_dispatch:
 
-  - name: Build debug APK
-    # run the wrapper from inside V2rayNG
-    run: ./gradlew :app:assembleDebug --no-daemon
-    working-directory: V2rayNG
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0
 
-  - name: Upload debug APK
-    uses: actions/upload-artifact@v4
-    with:
-      name: TagDrop-apk
-      path: V2rayNG/app/build/outputs/apk/debug/*.apk
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Grant execute to gradlew
+        run: chmod +x ./gradlew
+        working-directory: V2rayNG
+
+      - name: Build debug APK
+        run: ./gradlew :app:assembleDebug --no-daemon
+        working-directory: V2rayNG
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: TagDrop-apk
+          path: V2rayNG/app/build/outputs/apk/debug/*.apk
