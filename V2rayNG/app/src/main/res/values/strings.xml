@@ -2,4 +2,6 @@
 <resources>
     <!-- App name changed to TagDrop -->
     <string name="app_name" translatable="false">TagDrop</string>
+    <!-- Label used by Quick Settings tile and other components -->
+    <string name="app_tile_name">TagDrop</string>
 </resources>
