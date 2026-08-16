@@ -200,6 +200,10 @@ dependencies {
     // Reorderable list
     implementation(libs.reorderable)
 
+    // Material & CardView (needed for UI components)
+    implementation("com.google.android.material:material:1.9.0")
+    implementation("androidx.cardview:cardview:1.0.0")
+
     // Testing Libraries
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
