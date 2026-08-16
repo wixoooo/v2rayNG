@@ -33,7 +33,7 @@
             android:textColor="@android:color/white"
             android:textSize="20sp"
             android:layout_centerInParent="true"
-            android:fontFamily="sans-serif-medium"/>
+            android:textStyle="bold" />
 
         <ImageButton
             android:id="@+id/btn_settings"
@@ -46,17 +46,17 @@
             android:contentDescription="settings"/>
     </RelativeLayout>
 
-    <!-- Center circle card -->
+    <!-- Center circle card (Fixed Crash) -->
     <androidx.cardview.widget.CardView
         android:id="@+id/card_center"
         android:layout_width="220dp"
         android:layout_height="220dp"
         app:cardCornerRadius="110dp"
-        app:cardElevation="8dp"
+        app:cardElevation="0dp"
         android:layout_gravity="center"
         android:layout_marginTop="80dp"
         android:layout_marginBottom="80dp"
-        app:cardBackgroundColor="#6633B5E5"
+        app:cardBackgroundColor="#33B5E5"
         android:layout_centerInParent="true">
 
         <FrameLayout
@@ -71,7 +71,7 @@
                 android:textSize="26sp"
                 android:textColor="@android:color/white"
                 android:layout_gravity="center"
-                android:fontFamily="sans-serif-medium"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_sub"
@@ -79,7 +79,7 @@
                 android:layout_height="wrap_content"
                 android:text="Drop to connect"
                 android:textSize="12sp"
-                android:textColor="#DDFFFFFF"
+                android:textColor="@android:color/white"
                 android:layout_gravity="center|bottom"
                 android:layout_marginBottom="24dp"/>
 
@@ -94,7 +94,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="24dp"
         android:src="@drawable/ic_add"
-        app:backgroundTint="#FF03DAC5" />
+        app:backgroundTint="#03DAC5" />
 
     <!-- bottom liquid-like slider placeholder -->
     <FrameLayout
